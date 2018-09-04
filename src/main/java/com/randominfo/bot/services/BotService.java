@@ -1,27 +1,38 @@
 package com.randominfo.bot.services;
 
+import com.randominfo.bot.processors.IncomeMessageProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import javax.annotation.PostConstruct;
+
 
 @Service
 public class BotService extends TelegramLongPollingBot{
 
+    @Autowired
+    private LoggerService log;
+
+    @PostConstruct
+    private void init(){
+        log.debug("Request Config: {}", getOptions().getRequestConfig());
+    }
+
     @Value("${token.key}")
     private String token;
 
+    @Autowired
+    private IncomeMessageProcessor messageProcessor;
+
     public void onUpdateReceived(Update update) {
+        log.debug("Update: {}", update);
         if(update.hasMessage()){
-            SendMessage sendMessage = new SendMessage()
-                    .setText("Hello");
-            try {
-                execute(sendMessage);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+           messageProcessor.process(update.getMessage());
         }
     }
 
