@@ -10,6 +10,9 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Service
@@ -18,21 +21,18 @@ public class BotService extends TelegramLongPollingBot{
     @Autowired
     private LoggerService log;
 
-    @PostConstruct
-    private void init(){
-        log.debug("Request Config: {}", getOptions().getRequestConfig());
-    }
-
     @Value("${token.key}")
     private String token;
 
     @Autowired
     private IncomeMessageProcessor messageProcessor;
 
+
+    public final Map<Integer, String> userLastMessage = new ConcurrentHashMap<>();
+
     public void onUpdateReceived(Update update) {
-        log.debug("Update: {}", update);
         if(update.hasMessage()){
-           messageProcessor.process(update.getMessage());
+            messageProcessor.process(update.getMessage());
         }
     }
 

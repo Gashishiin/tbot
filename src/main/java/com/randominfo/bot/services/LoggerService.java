@@ -24,4 +24,8 @@ public class LoggerService {
         logger.info(message, args);
     }
 
+    public void error(String message, Object ... args){
+        logger.error(message, args);
+    }
+
 }
