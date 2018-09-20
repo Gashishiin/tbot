@@ -9,7 +9,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 @Service
 public class CommandManager {
 
-
     @Autowired
     private MessageManager messageManager;
 

@@ -70,6 +70,10 @@ public class IncomeMessageProcessor {
             if (messageText.startsWith(CommandEnum.WEATHER.getName())){
                 command = new ShowWeatherCommand();
             }
+
+            if (messageText.startsWith(CommandEnum.CHANGE_CITY.getName())){
+                command = new ChangeCityCommand();
+            }
             
             if (command != null){
                 commandManager.execute(command, message);    

@@ -18,8 +18,7 @@ public class ShowWeatherCommand implements CommandExecutor {
         if (weatherInfo == null){
             return weatherService.askForCity(userId, chatId);
         } else {
-            String weatherText = weatherService.getWeather(weatherInfo);
-            sendMessage.setText(weatherText);
+            sendMessage = weatherService.getWeather(weatherInfo,sendMessage);
         }
         return sendMessage;
     }

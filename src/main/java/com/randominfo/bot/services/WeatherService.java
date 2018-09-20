@@ -4,6 +4,7 @@ import com.randominfo.bot.MessageManager;
 import com.randominfo.bot.commands.ShowWeatherCommand;
 import com.randominfo.bot.entity.WeatherInfo;
 import com.randominfo.bot.repository.WeatherInfoRepo;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,7 +67,7 @@ public class WeatherService {
             URL url = new URL(urlString);
             JSONObject response = jsonResponseService.getJsonObject(url);
             log.debug("JSON for weather setting: {}", response);
-            cityName = response.getString("name");
+            cityName = messageText;
             cityId = response.getInt("id");
             WeatherInfo weatherInfo = new WeatherInfo(userId, cityName, cityId);
             weatherInfoRepo.save(weatherInfo);
@@ -83,7 +84,7 @@ public class WeatherService {
         return weatherInfoRepo.findByUserId(userId);
     }
 
-    public String getWeather(WeatherInfo weatherInfo) {
+    public SendMessage getWeather(WeatherInfo weatherInfo, SendMessage sendMessage) {
         log.debug("Weather Info: {}", weatherInfo);
         String urlString = String.format("%s?id=%d&appid=%s&units=metric", baseUrl, weatherInfo.getCityId(), weatherApiKey);
         log.debug("Weather URL: {}", urlString);
@@ -93,8 +94,13 @@ public class WeatherService {
             JSONObject jsonObject = jsonResponseService.getJsonObject(url);
             log.debug("Json Weather: {}", jsonObject);
             JSONObject main = jsonObject.getJSONObject("main");
+            JSONArray weatherJSON = jsonObject.getJSONArray("weather");
+            String iconName = weatherJSON.getJSONObject(0).getString("icon");
+            String emojiWeather = new StringBuilder().appendCodePoint(WeatherEmoji.map.get(iconName)).toString();
             int temp = main.getInt("temp");
-            weatherText = String.format("Город: %s, Температура: %d", weatherInfo.getCityName(), temp);
+
+            weatherText = String.format("%s, Температура: %d\u00b0C, %s", weatherInfo.getCityName(), temp, emojiWeather);
+
         } catch (MalformedURLException e) {
             log.error("Problem during getting weather", e);
             weatherText = "Не смог определить погоду :(";
@@ -102,6 +108,7 @@ public class WeatherService {
             log.error("Problem during weather parsing and decoding", e);
             weatherText = "Не смог определить погоду";
         }
-        return weatherText;
+        sendMessage.setText(weatherText);
+        return sendMessage;
     }
 }
